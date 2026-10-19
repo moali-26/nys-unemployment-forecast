@@ -27,6 +27,7 @@ FRED_SERIES = {
     "NJUR": "nj_ur",               # NJ unemployment rate, monthly, SA
     "CTUR": "ct_ur",               # CT unemployment rate, monthly, SA
     "PAUR": "pa_ur",               # PA unemployment rate, monthly, SA
+    "GACDISA066MSFRBNY": "empire_general",  # NY Fed Empire State survey, general business conditions, monthly, SA
 }
 
 # Repo root is two folders up from this file (src/data/fetch_fred.py).

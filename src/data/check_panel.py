@@ -36,6 +36,8 @@ EXPECTED_START = {
     "ct_ur": "1976-01-01",
     "pa_ur": "1976-01-01",
     "sp500": "1976-01-01",
+    "empire_general": "2001-07-01",
+    "indeed_postings": "2020-02-01",
 }
 
 # Months that are allowed to be missing in the middle of a series.
@@ -44,8 +46,9 @@ EXPECTED_GAPS = {
     "2025-10-01": ["ny_ur", "us_ur", "nj_ur", "ct_ur", "pa_ur"],
 }
 
-# Columns that can legitimately go negative (an inverted yield curve).
-CAN_BE_NEGATIVE = ["spread_10y3m"]
+# Columns that can legitimately go negative (an inverted yield curve; a
+# diffusion index below zero means more firms report worse conditions).
+CAN_BE_NEGATIVE = ["spread_10y3m", "empire_general"]
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PANEL_PATH = REPO_ROOT / "data" / "processed" / "monthly_panel.csv"
