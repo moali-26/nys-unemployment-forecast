@@ -1,0 +1,7 @@
+pandas
+fredapi
+yfinance
+python-dotenv
+statsmodels
+requests
+openpyxl
