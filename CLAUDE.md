@@ -26,6 +26,8 @@ python src/data/fetch_yfinance.py
 python src/data/fetch_indeed.py
 python src/data/build_panel.py
 python src/data/check_panel.py
+python src/data/fetch_taxable_sales.py
+python src/data/build_taxable_sales.py
 ```
 
 There is no test suite or linter configured. Validate pipeline changes with sanity checks on the output (latest values match the source site, dates unique and monthly, each column starts near its source history start, NaNs only where expected) and by plotting each column.

@@ -14,6 +14,8 @@ python src/data/fetch_yfinance.py
 python src/data/fetch_indeed.py
 python src/data/build_panel.py
 python src/data/check_panel.py
+python src/data/fetch_taxable_sales.py
+python src/data/build_taxable_sales.py
 ```
 
 The fetch scripts save untouched source data to `data/raw/`. `build_panel.py` converts everything to monthly and writes `data/processed/monthly_panel.csv`. `check_panel.py` runs sanity checks and saves a plot of every column to `data/processed/panel_plots.png`.
@@ -68,6 +70,21 @@ FRED dates each claims week by the Saturday it ends on. The week containing the 
 The reference week suggests July claims fell 42%. The weekly data shows both Julys had a similar spike. Seasonal adjustment then makes this worse: STL learns that July is usually about 1.8x normal and divides every July by that, so July 2026 comes out at roughly half its true level. The monthly average always includes the spike weeks, so it adjusts cleanly. That's why the panel has no seasonally adjusted reference-week NY column: `ny_claims` is kept for reference, but model with `ny_claims_avg_sa`.
 
 `us_claims` doesn't have this problem because `ICSA` is already seasonally adjusted week by week by the Department of Labor.
+
+### Quarterly file: NYS taxable sales
+
+`data/processed/quarterly_taxable_sales.csv` is kept separate from the monthly panel because it is quarterly, and spreading it across months would invent values.
+
+- **Source:** NY open data, [Taxable Sales And Purchases Quarterly Data](https://data.ny.gov/d/ny73-2j3u), statewide rows only. From March 2013.
+- **Quarters are NY sales-tax quarters, not calendar quarters.** The sales-tax year runs March to February: Mar–May, Jun–Aug, Sep–Nov, Dec–Feb. `date` is the first month of the quarter (`2026-03-01` = Mar–May 2026).
+- **`taxable_sales`** is the sum of all industry groups, in dollars, NSA. A few small industries are suppressed for confidentiality (`suppressed_industries`, 0–3 per quarter) and count as zero, so the total is slightly understated.
+- **`taxable_sales_sa`** is STL-adjusted in logs with `seasonal=13`. The default setting let the 2020 crash leak into the seasonal pattern, so the stiffer setting keeps the COVID drop in the adjusted series where it belongs.
+- **`status`** is `P` (preliminary, can still be revised) or `F` (final).
+
+### Sources considered but not included
+
+- **BLS JOLTS state estimates (NY openings, hires, quits, layoffs).** Available from the BLS API, but as of October 2026 state data stops at December 2025, for every state checked (NY and CA), while national JOLTS is current through August 2026. A feature with no 2026 values can't help forecast current months, so it's paused until BLS resumes state publication.
+- **NYS DOL WARN notices.** Notices before April 2025 are individual web pages, with no bulk export. Since April 2025 they're in a Tableau dashboard that does allow downloads, but that's only about 18 months of history, too short to model with.
 
 ### Known issues for modelers
 
