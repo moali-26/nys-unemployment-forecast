@@ -46,6 +46,7 @@ WEEKLY_AVERAGE_SERIES = {
 DAILY_SERIES = {
     "fred_T10Y3M": "spread_10y3m",
     "yf_GSPC": "sp500",
+    "indeed_NY": "indeed_postings",
 }
 # NSA columns that get an STL-adjusted "<name>_sa" column.
 SEASONALLY_ADJUST = ["ny_claims_avg"]
@@ -55,7 +56,7 @@ COLUMN_ORDER = [
     "ny_ur", "ny_claims", "ny_claims_avg", "ny_claims_avg_sa", "ny_payrolls", "ny_coincident",
     "us_ur", "us_claims", "spread_10y3m", "fedfunds",
     "nj_ur", "ct_ur", "pa_ur", "sp500",
-    "empire_general",
+    "empire_general", "indeed_postings",
 ]
 
 # Panel starts with the target's history (NYUR begins Jan 1976) and ends at the

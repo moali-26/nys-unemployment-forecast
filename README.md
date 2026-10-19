@@ -11,6 +11,7 @@ With the virtual environment active and `FRED_API_KEY` set in `.env` (see `.env.
 ```
 python src/data/fetch_fred.py
 python src/data/fetch_yfinance.py
+python src/data/fetch_indeed.py
 python src/data/build_panel.py
 python src/data/check_panel.py
 ```
@@ -45,6 +46,9 @@ You don't need to rerun anything to use the data: the committed `monthly_panel.c
 | `nj_ur`, `ct_ur`, `pa_ur` | FRED `NJUR`, `CTUR`, `PAUR`, neighboring states' unemployment rates, SA | Monthly already |
 | `sp500` | Yahoo Finance `^GSPC`, S&P 500 close | Monthly average of daily values |
 | `empire_general` | FRED `GACDISA066MSFRBNY`, NY Fed Empire State Manufacturing Survey, current general business conditions, SA. From 2001-07. | Monthly already |
+| `indeed_postings` | Indeed Hiring Lab job postings index, New York, SA, Feb 1 2020 = 100. From 2020-02. | Monthly average of daily values |
+
+`indeed_postings` data is from [Indeed Hiring Lab](https://github.com/hiring-lab/job_postings_tracker), licensed CC BY 4.0. It is already seasonally adjusted and smoothed with a 7-day trailing average, and Indeed revises its history. It is genuinely missing before February 2020, so models that use it are limited to 2020 onward.
 
 `empire_general` is a diffusion index: the percent of NY manufacturers reporting better conditions minus the percent reporting worse. Above 0 means conditions are improving; below 0 means they're getting worse.
 

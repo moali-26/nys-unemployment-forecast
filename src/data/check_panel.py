@@ -37,6 +37,7 @@ EXPECTED_START = {
     "pa_ur": "1976-01-01",
     "sp500": "1976-01-01",
     "empire_general": "2001-07-01",
+    "indeed_postings": "2020-02-01",
 }
 
 # Months that are allowed to be missing in the middle of a series.
