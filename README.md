@@ -33,6 +33,8 @@ You don't need to rerun anything to use the data: the committed `monthly_panel.c
 
 ### Columns
 
+Full details for every column in both output files (units, series IDs, transformations, start dates and typical release lags) are in [`data/processed/data_dictionary.csv`](data/processed/data_dictionary.csv). `check_panel.py` fails if a panel column is missing from it.
+
 | Column | Source | How it becomes monthly |
 |---|---|---|
 | `ny_ur` | FRED `NYUR`, NY unemployment rate, SA. **Target.** | Monthly already |

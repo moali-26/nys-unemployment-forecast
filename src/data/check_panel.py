@@ -53,6 +53,7 @@ CAN_BE_NEGATIVE = ["spread_10y3m", "empire_general"]
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PANEL_PATH = REPO_ROOT / "data" / "processed" / "monthly_panel.csv"
 PLOT_PATH = REPO_ROOT / "data" / "processed" / "panel_plots.png"
+DICTIONARY_PATH = REPO_ROOT / "data" / "processed" / "data_dictionary.csv"
 
 panel = pd.read_csv(PANEL_PATH, parse_dates=["date"]).set_index("date")
 failures = []
@@ -103,6 +104,12 @@ for column in panel.columns:
     if column in CAN_BE_NEGATIVE:
         continue
     check((panel[column].dropna() >= 0).all(), f"{column} has no negative values")
+
+# 7. Every panel column is documented in the data dictionary.
+dictionary = pd.read_csv(DICTIONARY_PATH)
+documented = set(dictionary.loc[dictionary["file"] == "monthly_panel.csv", "name"])
+undocumented = [c for c in panel.columns if c not in documented]
+check(not undocumented, f"every column is in data_dictionary.csv {undocumented or ''}")
 
 # Plot every column on its own small chart.
 n_cols = 3
