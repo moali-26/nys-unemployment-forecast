@@ -55,6 +55,8 @@ There is no test suite or linter configured. Validate pipeline changes with sani
 - Daily series (e.g. T10Y3M, ^GSPC, Indeed) -> monthly: monthly average.
 - Quarterly series (NYS taxable sales) go in a separate file and are never interpolated into the monthly panel.
 - Not-seasonally-adjusted series (e.g. NYICLAIMS, taxable sales): keep the raw column and add an STL-adjusted `<name>_sa` column.
+- Exception for NY claims: the reference-week value is distorted by a short post-July 4 spike that the 12th's week only sometimes catches, so STL on it is unreliable. The panel has `ny_claims` (reference week, NSA), `ny_claims_avg` (average of all weeks ending in the month, NSA, NaN if fewer than 4 weeks) and `ny_claims_avg_sa` (STL on `ny_claims_avg`). Model with `ny_claims_avg_sa`. There is deliberately no SA reference-week column.
+- STL is two-sided (it uses later data to estimate each month's seasonal factor), so `_sa` columns contain mild look-ahead; strict backtests should re-run the adjustment on each training window.
 
 ## Git workflow
 
