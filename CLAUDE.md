@@ -22,6 +22,7 @@ Run the pipeline from the repo root, in order:
 
 ```
 python src/data/fetch_fred.py
+python src/data/fetch_yfinance.py
 python src/data/build_panel.py
 ```
 
