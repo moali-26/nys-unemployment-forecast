@@ -92,3 +92,40 @@ The reference week suggests July claims fell 42%. The weekly data shows both Jul
 
 - **October 2025 is missing for all unemployment rates** (`ny_ur`, `us_ur`, `nj_ur`, `ct_ur`, `pa_ur`). The federal government shutdown stopped BLS from collecting the household survey that month, so the value was never published. Models that need an unbroken series (ARIMA, ETS) have to handle this gap themselves, for example by interpolating inside the model code.
 - **STL seasonal adjustment looks ahead.** STL estimates each month's seasonal pattern partly from later years, so `ny_claims_avg_sa` contains a small amount of future information. For a strict backtest, re-run the adjustment on each training window.
+
+## Time series models (Step 2)
+
+**Start with [docs/STEP2_HANDOFF.md](docs/STEP2_HANDOFF.md).** It summarizes the findings, the final frozen models, and the forecast file for the dashboard ([`results/forecasts.csv`](results/forecasts.csv)). The final models run in the pseudo-real-time framework in [`modeling/`](modeling/).
+
+### v0 exploratory features (superseded)
+
+The section below documents our first feature pass (`src/features/`). It is kept for reference; its claims seasonal adjustment and timing assumptions are not used by the final models.
+
+
+```
+python src/features/build_features.py
+python src/features/check_features.py
+```
+
+`build_features.py` reads the processed panel and writes `data/features/model_features.csv` (one row per month, 1976-01 on) plus `data/features/feature_dictionary.csv`. `check_features.py` runs ADF + KPSS tests on every level and transformed series (`data/features/stationarity.csv`) and plots them (`data/features/feature_plots.png`).
+
+- **October 2025 gap:** `ny_ur_raw` keeps it as NaN. Use it for SARIMA/ARIMAX: statsmodels `SARIMAX` skips missing values on its own. The interpolated unemployment-rate columns (`ny_ur`, `nj_ur`, ...; flagged by `ur_imputed`) are for VAR, which cannot take NaN.
+- **Naming:** `d_` = first difference (percentage points), `g_` = 100 × log difference (monthly % growth), `_lagK` = lagged K months. Levels keep their panel names. `empire_general` is already stationary, so it is used in levels.
+- **Stationarity:** `ny_ur` is non-stationary in levels and stationary after one difference, so use d = 1 (or model `d_ny_ur`). Every `d_` / `g_` column passes ADF and KPSS.
+- **`yoy_ny_claims`:** 12-month log change of the NSA NY claims average, with no STL look-ahead. Prefer `g_ny_claims_avg_sa` in the main models and use this as a robustness check (it has a base effect: +300% in 2020, about −200% in 2021).
+- **Multi-step forecasts (direct method):** lags 1–6 and 12 of `d_ny_ur` and the main regressors. Fit a separate ARIMAX for each horizon h and use only `_lagK` columns with K ≥ h, so every input exists when the forecast is made. Do not feed actual future regressor values into a backtest.
+- **Splits (`split` column):** all three avoid COVID and the October 2025 gap, and have no missing values in any core feature.
+
+  | split | months | use |
+  |---|---|---|
+  | `train` | 1990-02 to 2016-12 (323) | fit models |
+  | `validation` | 2017-01 to 2020-02 (38) | pick orders, lags and regressors |
+  | `excluded` | 2020-03 to 2021-12 (22) | COVID; dropped from fitting and scoring (`covid = 1`) |
+  | `test` | 2022-01 to 2025-09 (45) | score once at the end, after choices are frozen |
+  | `live` | 2025-10 on | refit on everything and produce the real forecast |
+  | `before` | before 1990-02 | not every core regressor exists yet |
+
+  Rows in 2022 have `_lag` values that reach back into COVID months. Drop the first 12 test months, or treat that as a known limitation.
+- **Samples:** `sample_long` (1990-02 on, all core regressors), `sample_empire` (2001-07 on), `sample_indeed` (2020-03 on). Indeed does not reach the train split, so it can only be used in short post-COVID comparisons.
+- **Taxable sales:** quarterly growth placed on the monthly grid from the month it is published (assumed 3 months after the quarter ends) and held until the next release. Nothing is interpolated between quarters.
+- **Publication lag:** `pub_lag_months` in the feature dictionary is how many months after the reference month a value is published, net of any lag. For a forecast made at the start of month t+1, only use features with `pub_lag_months` ≤ 0 at row t.
