@@ -2,8 +2,8 @@
 
 Implemented on `step3-ml-validation`, based on main commit
 `391860f231aa8f626a90fb4ee252b0149c382668`. All forecasting code, data and
-canonical results from Steps 1 and 2 are preserved. This branch is for review;
-it does not merge changes into main.
+canonical results from Steps 1 and 2 are preserved. Step 3 code and outputs
+are stored separately under `step3_ml` experiment directories.
 
 ## Findings
 

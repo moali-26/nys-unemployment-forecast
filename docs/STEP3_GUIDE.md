@@ -4,8 +4,8 @@
 
 This experiment uses the frozen Step 1 data and Step 2 publication rules to
 forecast New York State unemployment at horizons of 1, 3 and 6 months. Each
-month-end forecast uses only information published by that origin. The work is
-isolated on `step3-ml-validation`; it does not replace the main branch results.
+month-end forecast uses only information published by that origin. Developed on
+`step3-ml-validation`, this experiment preserves the Step 1 data and Step 2 results.
 
 ## Suggested reading order
 
