@@ -1,5 +1,13 @@
 # nys-unemployment-forecast
 
+## Machine learning and validation (Step 3)
+
+See [the Step 3 handoff](docs/STEP3_HANDOFF.md) for methods, limitations,
+reproduction commands and results, or [the walkthrough](docs/STEP3_GUIDE.md).
+Source code is in `modeling/src/experiments/step3_ml/`; generated forecasts,
+common-sample metrics and figures are in `modeling/results/experiments/step3_ml/`.
+This experiment preserves the Step 1 data and frozen Step 2 code/results.
+
 Can economic indicators and alternative data improve short-term forecasts of the New York State unemployment rate (FRED `NYUR`)?
 
 ## Data pipeline (Step 1)
