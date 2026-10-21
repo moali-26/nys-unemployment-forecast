@@ -137,3 +137,20 @@ reproduction commands and results, or [the walkthrough](docs/STEP3_GUIDE.md).
 Source code is in `modeling/src/experiments/step3_ml/`; generated forecasts,
 common-sample metrics and figures are in `modeling/results/experiments/step3_ml/`.
 This experiment preserves the Step 1 data and frozen Step 2 code/results.
+
+## Dashboard (Step 4) and AI assistant (Step 5)
+
+A Streamlit + Plotly app in [`app/`](app/) that reads only committed outputs (the Step 1 panel, Step 2 `results/`, Step 3 `modeling/results/experiments/step3_ml/`), so it runs offline.
+
+```
+pip install -r requirements.txt
+streamlit run app/app.py
+```
+
+Tabs: **Dashboard** (headline tiles, the forecast explorer with the assistant panel beside it, live forecasts, findings), **Model scorecard** (error vs. naive by period and horizon, plus the with/without-indicators comparison), **Indicators** (a tile per panel series tagged by how the models use it, and a chart comparing any series with NY unemployment) and **Methodology**. The original overlay Indicators page is kept in `app/app.py` behind `SHOW_OLD_INDICATORS = False`.
+
+The Google search trends tile is a **simulated placeholder** (`placeholder_trends()` in `app/app.py`), not real data.
+
+**Ask the forecast** is a Claude (`claude-opus-5-5`) assistant whose system prompt contains the Step 2 and Step 3 handoffs, the accuracy table, the live forecasts and the latest panel values, so it answers from our results. It needs `ANTHROPIC_API_KEY` in `.env` locally, or in the app's secrets on Streamlit Community Cloud (`.streamlit/secrets.toml` is gitignored). Without a key the panel shows a preview conversation and everything else still works.
+
+Files: `app/data.py` (loaders, model names and colors), `app/charts.py` (Plotly figures), `app/assistant.py` (Claude prompt and streaming), `app/app.py` (layout), `app/style.css` (styling).
