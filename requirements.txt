@@ -6,3 +6,6 @@ statsmodels
 requests
 openpyxl
 matplotlib
+streamlit
+plotly
+anthropic
