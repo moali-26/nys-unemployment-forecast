@@ -82,3 +82,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
 .tag.context { background: #FDF1EA; color: #9A4310; }
 .tag.idea { background: #ffffff; color: #5A6470; border: 1px dashed #C3C9D0; }
 .group-title { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #5A6470; margin: 14px 0 6px; }
+
+/* Assistant answers match the 14px chat bubbles */
+.st-key-chat p, .st-key-chat li { font-size: 14px; line-height: 1.5; }
+.st-key-chat ul { padding-left: 1.1rem; }

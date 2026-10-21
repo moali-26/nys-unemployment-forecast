@@ -120,7 +120,7 @@ each forecast date.</div>
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        chat = st.container(height=430, border=False)
+        chat = st.container(height=430, border=False, autoscroll=True, key="chat")
         picked = None
         for text in SUGGESTIONS:
             if st.button(text, key=f"suggest_{text}", disabled=not enabled):

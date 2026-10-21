@@ -10,7 +10,7 @@ import anthropic
 import streamlit as st
 from dotenv import load_dotenv
 
-from data import MODEL_LABELS, PERIODS, load_forecasts, load_metrics, load_panel, read_text
+from data import MODEL_LABELS, PERIODS, load_ablation, load_forecasts, load_metrics, load_panel, read_text
 
 MODEL = "claude-opus-5-5"
 
@@ -27,7 +27,11 @@ project material below. Rules:
 uncertainty ranges calibrated on calm years, and alternative data that was mostly not tested.
 - These are forecasts from a class project, not official projections. Do not give financial or \
 career advice.
-- Keep answers under about 200 words unless the user asks for more detail."""
+- Answers appear in a narrow side panel: keep them under about 120 words unless the user asks for more. \
+Lead with a one-sentence answer in bold, then at most three short bullets. No headings or tables.
+- The September 2026 actual was released on 20 October 2026 but is not in this data snapshot; say so if asked.
+- If a question has nothing to do with the project, reply in one sentence that you can only help with the \
+NY unemployment forecasts, and suggest a related question."""
 
 
 def get_api_key():
@@ -62,25 +66,51 @@ def build_system_prompt():
         "## Step 3 handoff (machine learning)\n" + read_text("docs/STEP3_HANDOFF.md"),
         "## Accuracy on the common sample (rmse in percentage points)\n" + table.to_csv(index=False, float_format="%.3f"),
         "## Live forecasts (origin = forecast date, date = target month)\n" + live.to_csv(index=False, float_format="%.2f"),
+        "## With vs. without indicators (Ridge vs. Ridge on the rate's own history only; improvement_pct = % lower RMSE)\n"
+        + load_ablation().to_csv(index=False, float_format="%.3f"),
         "## Latest panel values (reference month, NaN = not yet published)\n" + recent.to_csv(index=False, float_format="%.2f"),
     ]
     return "\n\n".join(sections)
 
 
+UNAVAILABLE = "The assistant is unavailable right now. The rest of the dashboard still works."
+
+
 def stream_answer(messages):
-    """Yield the answer text as it streams, for st.write_stream."""
-    client = anthropic.Anthropic(api_key=get_api_key())
-    with client.beta.messages.stream(
-        model=MODEL,
-        max_tokens=16000,
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        output_config={"effort": "medium"},
-        system=[{"type": "text", "text": build_system_prompt(), "cache_control": {"type": "ephemeral"}}],
-        messages=messages,
-    ) as stream:
-        yield from stream.text_stream
-        final = stream.get_final_message()
+    """Yield the answer text as it streams, for st.write_stream.
+
+    API problems (bad key, spend limit, rate limit, network) become a short message in the
+    chat instead of a traceback, so a failure mid-demo doesn't break the page.
+    """
+    try:
+        client = anthropic.Anthropic(api_key=get_api_key())
+        with client.beta.messages.stream(
+            model=MODEL,
+            max_tokens=16000,
+            betas=["server-side-fallback-2026-07-01"],
+            fallbacks="default",
+            output_config={"effort": "low"},
+            system=[{"type": "text", "text": build_system_prompt(), "cache_control": {"type": "ephemeral"}}],
+            messages=messages,
+        ) as stream:
+            yield from stream.text_stream
+            final = stream.get_final_message()
+    except anthropic.AuthenticationError:
+        yield f"{UNAVAILABLE} (The API key was rejected.)"
+        return
+    except anthropic.RateLimitError:
+        yield "The assistant is getting too many requests. Wait a few seconds and ask again."
+        return
+    except anthropic.BadRequestError as e:
+        if "usage limits" in str(e):
+            yield f"{UNAVAILABLE} (The monthly API spend limit has been reached.)"
+        else:
+            yield UNAVAILABLE
+        return
+    except (anthropic.APIStatusError, anthropic.APIConnectionError):
+        yield f"{UNAVAILABLE} (Could not reach the Claude API.)"
+        return
+
     if final.stop_reason == "refusal":
         yield "\n\nSorry, I can't help with that one. Try asking about the forecasts or models."
     elif final.stop_reason == "max_tokens":
